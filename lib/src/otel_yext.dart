@@ -1,15 +1,16 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_yext_suppression.dart';
 
 const _tracerName = 'dartastic_otel_libs_yext';
 
-Tracer _tracer() => OTel.tracerProvider().getTracer(_tracerName);
+APITracer _tracer() => OTelAPI.tracerProvider().getTracer(_tracerName);
 
 class YextResult {
+  /// Creates a result.
   const YextResult({
     this.accountId,
     this.entityKind,
@@ -84,8 +85,13 @@ class YextResult {
   final int? statusCode;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class YextCallResult<T> {
+  /// Creates a call result.
   const YextCallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final YextResult? result;
 }
@@ -114,50 +120,50 @@ Future<T> tracedYext<T>({
   final span = _tracer().startSpan(
     'yext $operation',
     kind: SpanKind.client,
-    attributes: OTel.attributesFromMap(m),
+    attributes: OTelAPI.attributesFromMap(m),
   );
   try {
     final r = await invoke();
     if (r.result != null) {
       final extras = <Attribute<Object>>[];
       if (r.result!.accountId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'yext.account.id',
           r.result!.accountId!,
         ));
       }
       if (r.result!.entityKind != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'yext.entity.kind',
           r.result!.entityKind!,
         ));
       }
       if (r.result!.entityId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'yext.entity.id',
           r.result!.entityId!,
         ));
       }
       if (r.result!.entityType != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'yext.entity.type',
           r.result!.entityType!,
         ));
       }
       if (r.result!.categoryIds != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'yext.categories',
           r.result!.categoryIds!,
         ));
       }
       if (r.result!.listingPublisherId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'yext.listing.publisher_id',
           r.result!.listingPublisherId!,
         ));
       }
       if (r.result!.listingStatus != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'yext.listing.status',
           r.result!.listingStatus!,
         ));
@@ -170,55 +176,55 @@ Future<T> tracedYext<T>({
         }
       }
       if (r.result!.suggestionsPending != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'yext.suggestions.pending',
           r.result!.suggestionsPending!,
         ));
       }
       if (r.result!.reviewId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'yext.review.id',
           r.result!.reviewId!,
         ));
       }
       if (r.result!.reviewRating != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'yext.review.rating',
           r.result!.reviewRating!,
         ));
       }
       if (r.result!.experienceKey != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'yext.experience.key',
           r.result!.experienceKey!,
         ));
       }
       if (r.result!.queryId != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'yext.query.id',
           r.result!.queryId!,
         ));
       }
       if (r.result!.searchResultsTotal != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'yext.search.results_total',
           r.result!.searchResultsTotal!,
         ));
       }
       if (r.result!.directAnswerType != null) {
-        extras.add(OTel.attributeString(
+        extras.add(OTelAPI.attributeString(
           'yext.direct_answer.type',
           r.result!.directAnswerType!,
         ));
       }
       if (r.result!.spellChecked != null) {
-        extras.add(OTel.attributeBool(
+        extras.add(OTelAPI.attributeBool(
           'yext.spell_checked',
           r.result!.spellChecked!,
         ));
       }
       if (r.result!.statusCode != null) {
-        extras.add(OTel.attributeInt(
+        extras.add(OTelAPI.attributeInt(
           'http.response.status_code',
           r.result!.statusCode!,
         ));
@@ -229,13 +235,13 @@ Future<T> tracedYext<T>({
           );
         }
       }
-      if (extras.isNotEmpty) span.addAttributes(OTel.attributes(extras));
+      if (extras.isNotEmpty) span.addAttributes(OTelAPI.attributes(extras));
     }
     return r.value;
   } catch (e, st) {
-    span.addAttributes(OTel.attributes([
-      OTel.attributeString(
-        ErrorResource.errorType.key,
+    span.addAttributes(OTelAPI.attributes([
+      OTelAPI.attributeString(
+        ErrorAttributes.errorType.key,
         e.runtimeType.toString(),
       ),
     ]));
